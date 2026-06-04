@@ -1,11 +1,12 @@
 import { todaySGT, urgencyClass } from '../utils/sgt'
 
 describe('todaySGT', () => {
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => jest.useRealTimers())
+
   it('returns YYYY-MM-DD string in SGT', () => {
-    jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-05-29T16:30:00Z')) // 00:30 May 30 SGT
     expect(todaySGT()).toBe('2026-05-30')
-    jest.useRealTimers()
   })
 })
 
@@ -19,6 +20,10 @@ describe('urgencyClass', () => {
 
   it('returns empty string when createdAt is undefined', () => {
     expect(urgencyClass(undefined)).toBe('')
+  })
+
+  it('returns empty string when createdAt is an invalid date string', () => {
+    expect(urgencyClass('not-a-date')).toBe('')
   })
 
   it('returns empty string when task is less than 2 hours old', () => {
