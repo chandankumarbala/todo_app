@@ -6,23 +6,15 @@ export function todaySGT() {
 }
 
 /**
- * Returns current SGT hour (0-23).
- */
-export function currentSGTHour() {
-  const sgtDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Singapore' }))
-  return sgtDate.getHours()
-}
-
-/**
- * Returns urgency CSS class for a pending task based on deadline and current SGT time.
- * @param {string|null} deadline - YYYY-MM-DD
+ * Returns urgency CSS class for a pending task based on how long ago it was created.
+ * Yellow after 2 hours, red after 4 hours. Applies to all pending tasks.
+ * @param {string|null|undefined} createdAt - ISO timestamp string
  * @returns {'' | 'urgency-yellow' | 'urgency-red'}
  */
-export function urgencyClass(deadline) {
-  if (!deadline) return ''
-  if (deadline !== todaySGT()) return ''
-  const hour = currentSGTHour()
-  if (hour >= 16) return 'urgency-red'
-  if (hour >= 12) return 'urgency-yellow'
+export function urgencyClass(createdAt) {
+  if (!createdAt) return ''
+  const ageMs = Date.now() - new Date(createdAt).getTime()
+  if (ageMs >= 4 * 60 * 60 * 1000) return 'urgency-red'
+  if (ageMs >= 2 * 60 * 60 * 1000) return 'urgency-yellow'
   return ''
 }
