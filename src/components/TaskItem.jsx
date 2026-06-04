@@ -10,7 +10,7 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete }) {
   const [textVal, setTextVal] = useState(task.text)
   const [dateVal, setDateVal] = useState(task.deadline || todaySGT())
 
-  const urgency = urgencyClass(task.deadline)
+  const urgency = urgencyClass(task.created_at)
 
   const {
     attributes,
