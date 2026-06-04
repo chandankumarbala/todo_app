@@ -1,0 +1,80 @@
+<svg width="1024" height="1024" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="sq"><rect width="120" height="120" rx="26" ry="26"/></clipPath>
+  </defs>
+
+  <!-- ===== CORINTHIAN HELMET ===== -->
+  <!-- Dome -->
+  <path d="M44 52 Q44 40 60 38 Q76 40 76 52 L74 59 L46 59 Z" fill="#F1F5F9"/>
+  <!-- Cheek guards -->
+  <path d="M46 59 L44 66 L51 66 L53 59 Z" fill="#E2E8F0"/>
+  <path d="M74 59 L76 66 L69 66 L67 59 Z" fill="#E2E8F0"/>
+  <!-- Nose guard -->
+  <rect x="59" y="48" width="2" height="10" rx="1" fill="#CBD5E0"/>
+  <!-- Eye holes -->
+  <path d="M47 50 Q51 46 56 48 Q56 52 52 53 Q47 52 47 50Z" fill="#8B0000"/>
+  <path d="M73 50 Q69 46 64 48 Q64 52 68 53 Q73 52 73 50Z" fill="#8B0000"/>
+  <!-- Crest plume — sweeping back -->
+  <path d="M48 50 Q60 30 76 28 Q82 27 80 34 Q68 36 58 52" fill="#FF2222"/>
+  <path d="M50 49 Q61 33 76 31 Q80 32 78 37 Q67 39 59 51" fill="#FF7777" opacity="0.55"/>
+
+  <!-- ===== TORSO / BREASTPLATE ===== -->
+  <path d="M46 64 Q42 74 42 88 L78 88 Q78 74 74 64 Z" fill="#F1F5F9"/>
+  <!-- Muscle detail -->
+  <path d="M52 72 Q60 68 68 72 Q68 80 60 82 Q52 80 52 72Z" stroke="#CBD5E0" stroke-width="1.2" fill="none"/>
+  <line x1="60" y1="68" x2="60" y2="82" stroke="#CBD5E0" stroke-width="1.2"/>
+
+  <!-- Pteryges (armour skirt strips) -->
+  <rect x="43" y="87" width="6" height="8" rx="2" fill="#E2E8F0"/>
+  <rect x="50.5" y="87" width="6" height="9" rx="2" fill="#F1F5F9"/>
+  <rect x="57" y="87" width="6" height="9" rx="2" fill="#E2E8F0"/>
+  <rect x="63.5" y="87" width="6" height="9" rx="2" fill="#F1F5F9"/>
+  <rect x="70" y="87" width="6" height="8" rx="2" fill="#E2E8F0"/>
+
+  <!-- ===== RIGHT ARM — RAISED, HOLDING SWORD ===== -->
+  <!-- Upper arm -->
+  <path d="M74 66 Q82 60 86 50 Q88 44 86 40 L82 42 Q83 46 81 52 Q77 60 70 66 Z" fill="#F1F5F9"/>
+  <!-- Fist / grip hand -->
+  <ellipse cx="86" cy="37" rx="5" ry="6" fill="#E2E8F0"/>
+
+  <!-- SWORD (in hand, pointing up) -->
+  <!-- Pommel — at bottom of grip -->
+  <ellipse cx="86" cy="41" rx="3.5" ry="2.5" fill="#B8C4CE"/>
+  <!-- Handle / grip -->
+  <rect x="84.5" y="28.5" width="3" height="12.5" rx="1.5" fill="#718096"/>
+  <!-- Grip wrapping -->
+  <rect x="84.5" y="30" width="3" height="1.2" rx="0.5" fill="#4A5568"/>
+  <rect x="84.5" y="32.5" width="3" height="1.2" rx="0.5" fill="#4A5568"/>
+  <rect x="84.5" y="35" width="3" height="1.2" rx="0.5" fill="#4A5568"/>
+  <!-- Crossguard -->
+  <rect x="80" y="26.5" width="12" height="2.5" rx="1.25" fill="#A0AEC0"/>
+  <circle cx="80" cy="27.75" r="1.8" fill="#718096"/>
+  <circle cx="92" cy="27.75" r="1.8" fill="#718096"/>
+  <!-- Blade (pointing upward) -->
+  <polygon points="86,7 88.5,26.5 83.5,26.5" fill="#F0F4F8"/>
+  <!-- Fuller (blade ridge) -->
+  <rect x="85.5" y="7" width="1" height="19.5" fill="#CBD5E0" opacity="0.6"/>
+
+  <!-- ===== LEFT ARM + SHIELD ===== -->
+  <!-- Upper arm -->
+  <path d="M46 66 Q38 62 34 70 Q30 80 32 92 L36 92 Q34 82 37 74 Q40 68 46 68 Z" fill="#F1F5F9"/>
+  <!-- Shield -->
+  <path d="M24 72 Q20 80 20 88 Q20 100 28 104 Q32 106 34 104 Q28 100 28 88 Q28 80 32 72 Z" fill="#A0AEC0" stroke="#F1F5F9" stroke-width="0.8"/>
+  <!-- Shield boss (center knob) -->
+  <circle cx="27" cy="88" r="4" fill="#718096"/>
+  <circle cx="27" cy="88" r="2" fill="#94A3B8"/>
+  <!-- Lambda Λ -->
+  <path d="M22 98 L27 86 L32 98" stroke="#F1F5F9" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+
+  <!-- ===== LEGS ===== -->
+  <!-- Left -->
+  <path d="M48 95 L46 112 Q46 114 49 114 L53 114 Q55 114 54.5 112 L53 95 Z" fill="#F1F5F9"/>
+  <!-- Right -->
+  <path d="M72 95 L74 112 Q74 114 71 114 L67 114 Q65 114 65.5 112 L67 95 Z" fill="#F1F5F9"/>
+  <!-- Greave lines -->
+  <rect x="44.5" y="106" width="10" height="2" rx="1" fill="#CBD5E0"/>
+  <rect x="65.5" y="106" width="10" height="2" rx="1" fill="#CBD5E0"/>
+  <!-- Sandal straps -->
+  <rect x="44" y="111" width="11" height="2" rx="1" fill="#E2E8F0"/>
+  <rect x="65" y="111" width="11" height="2" rx="1" fill="#E2E8F0"/>
+</svg>
