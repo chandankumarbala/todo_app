@@ -2,15 +2,26 @@
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { priorityState, todaySGT } from '@/utils/sgt'
+import { progressState, todaySGT } from '@/utils/sgt'
 
-export default function TaskItem({ task, onUpdate, onComplete, onDelete, onTogglePriority }) {
+function pieArc(pct) {
+  if (pct <= 0 || pct >= 100) return null
+  const angle = (pct / 100) * 360
+  const rad = (angle - 90) * (Math.PI / 180)
+  const x = +(14 + 11 * Math.cos(rad)).toFixed(2)
+  const y = +(14 + 11 * Math.sin(rad)).toFixed(2)
+  const large = angle > 180 ? 1 : 0
+  return `M14,14 L14,3 A11,11 0 ${large},1 ${x},${y} Z`
+}
+
+export default function TaskItem({ task, onUpdate, onComplete, onDelete, onCycleProgress }) {
   const [editingText, setEditingText] = useState(false)
   const [editingDate, setEditingDate] = useState(false)
   const [textVal, setTextVal] = useState(task.text)
   const [dateVal, setDateVal] = useState(task.deadline || todaySGT())
 
-  const pState = priorityState(task.priority, task.priority_set_at)
+  const progress = task.progress ?? 0
+  const pState = progressState(progress)
 
   const {
     attributes,
@@ -41,19 +52,16 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
     setEditingDate(false)
   }
 
-  const rowBg = pState === 'priority-yellow' ? 'bg-yellow-300 border-yellow-400'
-              : pState === 'priority-red'    ? 'bg-red-100 border-red-300'
+  const rowBg = pState === 'progress-yellow' ? 'bg-yellow-300 border-yellow-400'
+              : pState === 'progress-red'    ? 'bg-red-100 border-red-300'
               : 'bg-gray-800 border-gray-700'
 
   const textColor = pState !== '' ? 'text-gray-800' : 'text-gray-100'
 
-  const priorityTitle = pState === 'priority-red'    ? 'Remove priority — overdue!'
-                      : pState === 'priority-yellow' ? 'Remove priority'
-                      : 'Set priority'
-
-  const priorityBtnClass = pState === 'priority-red'    ? 'text-red-500 animate-pulse'
-                         : pState === 'priority-yellow' ? 'text-yellow-600'
-                         : 'text-gray-500 hover:text-yellow-400'
+  const circleTitle =
+    progress === 0  ? 'Set progress' :
+    progress >= 100 ? 'Reset progress (100% — needs attention!)' :
+                      `Progress: ${progress}%`
 
   return (
     <div
@@ -118,12 +126,33 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
       </div>
 
       <button
-        onClick={() => onTogglePriority(task.id)}
-        title={priorityTitle}
-        aria-label={priorityTitle}
-        aria-pressed={pState !== ''}
-        className={`text-sm px-1 ${priorityBtnClass}`}
-      >⚑</button>
+        onClick={() => onCycleProgress(task.id)}
+        title={circleTitle}
+        aria-label={circleTitle}
+        aria-pressed={progress > 0}
+        className="p-0.5 rounded-full hover:bg-white/10 transition-colors"
+      >
+        <svg
+          width="20" height="20" viewBox="0 0 28 28"
+          className={progress >= 100 ? 'animate-pulse' : ''}
+        >
+          {progress <= 0 && (
+            <circle cx="14" cy="14" r="11" fill="none" stroke="#4b5563" strokeWidth="2.5" />
+          )}
+          {progress > 0 && progress < 100 && (
+            <>
+              <circle cx="14" cy="14" r="11" fill="none" stroke="#ca8a04" strokeWidth="2" />
+              <path d={pieArc(progress)} fill="#eab308" />
+            </>
+          )}
+          {progress >= 100 && (
+            <>
+              <circle cx="14" cy="14" r="11" fill="#ef4444" stroke="#ef4444" strokeWidth="2" />
+              <text x="14" y="18" textAnchor="middle" fontSize="10" fill="white" fontWeight="bold">!</text>
+            </>
+          )}
+        </svg>
+      </button>
 
       <button
         onClick={() => onComplete(task.id)}
