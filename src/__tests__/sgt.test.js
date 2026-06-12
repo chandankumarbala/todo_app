@@ -1,4 +1,4 @@
-import { todaySGT, urgencyClass } from '../utils/sgt'
+import { todaySGT, priorityState } from '../utils/sgt'
 
 describe('todaySGT', () => {
   beforeEach(() => jest.useFakeTimers())
@@ -10,49 +10,37 @@ describe('todaySGT', () => {
   })
 })
 
-describe('urgencyClass', () => {
+describe('priorityState', () => {
   beforeEach(() => jest.useFakeTimers())
   afterEach(() => jest.useRealTimers())
 
-  it('returns empty string when createdAt is null', () => {
-    expect(urgencyClass(null)).toBe('')
+  it('returns empty string when priority is 0', () => {
+    expect(priorityState(0, '2026-05-29T10:00:00Z')).toBe('')
   })
 
-  it('returns empty string when createdAt is undefined', () => {
-    expect(urgencyClass(undefined)).toBe('')
+  it('returns empty string when prioritySetAt is null', () => {
+    expect(priorityState(1, null)).toBe('')
   })
 
-  it('returns empty string when createdAt is an invalid date string', () => {
-    expect(urgencyClass('not-a-date')).toBe('')
+  it('returns empty string when prioritySetAt is undefined', () => {
+    expect(priorityState(1, undefined)).toBe('')
   })
 
-  it('returns empty string when task is less than 2 hours old', () => {
-    const createdAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T11:59:59Z')) // 1h 59m 59s later
-    expect(urgencyClass(createdAt)).toBe('')
+  it('returns priority-yellow when age is less than 2 hours', () => {
+    const setAt = new Date('2026-05-29T10:00:00Z').toISOString()
+    jest.setSystemTime(new Date('2026-05-29T11:59:59Z'))
+    expect(priorityState(1, setAt)).toBe('priority-yellow')
   })
 
-  it('returns urgency-yellow when task is exactly 2 hours old', () => {
-    const createdAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T12:00:00Z')) // exactly 2h later
-    expect(urgencyClass(createdAt)).toBe('urgency-yellow')
+  it('returns priority-red when age is exactly 2 hours', () => {
+    const setAt = new Date('2026-05-29T10:00:00Z').toISOString()
+    jest.setSystemTime(new Date('2026-05-29T12:00:00Z'))
+    expect(priorityState(1, setAt)).toBe('priority-red')
   })
 
-  it('returns urgency-yellow when task is between 2 and 4 hours old', () => {
-    const createdAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T13:30:00Z')) // 3.5h later
-    expect(urgencyClass(createdAt)).toBe('urgency-yellow')
-  })
-
-  it('returns urgency-red when task is exactly 4 hours old', () => {
-    const createdAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T14:00:00Z')) // exactly 4h later
-    expect(urgencyClass(createdAt)).toBe('urgency-red')
-  })
-
-  it('returns urgency-red when task is more than 4 hours old', () => {
-    const createdAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T20:00:00Z')) // 10h later
-    expect(urgencyClass(createdAt)).toBe('urgency-red')
+  it('returns priority-red when age is more than 2 hours', () => {
+    const setAt = new Date('2026-05-29T10:00:00Z').toISOString()
+    jest.setSystemTime(new Date('2026-05-29T15:00:00Z'))
+    expect(priorityState(1, setAt)).toBe('priority-red')
   })
 })

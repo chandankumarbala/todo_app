@@ -6,15 +6,14 @@ export function todaySGT() {
 }
 
 /**
- * Returns urgency CSS class for a pending task based on how long ago it was created.
- * Yellow after 2 hours, red after 4 hours. Applies to all pending tasks.
- * @param {string|null|undefined} createdAt - ISO timestamp string
- * @returns {'' | 'urgency-yellow' | 'urgency-red'}
+ * Returns priority display state for a pending task.
+ * @param {number} priority - 0 or 1
+ * @param {string|null|undefined} prioritySetAt - ISO timestamp when priority was set
+ * @returns {'' | 'priority-yellow' | 'priority-red'}
  */
-export function urgencyClass(createdAt) {
-  if (!createdAt) return ''
-  const ageMs = Date.now() - new Date(createdAt).getTime()
-  if (ageMs >= 4 * 60 * 60 * 1000) return 'urgency-red'
-  if (ageMs >= 2 * 60 * 60 * 1000) return 'urgency-yellow'
-  return ''
+export function priorityState(priority, prioritySetAt) {
+  if (!priority || !prioritySetAt) return ''
+  const ageMs = Date.now() - new Date(prioritySetAt).getTime()
+  if (ageMs >= 2 * 60 * 60 * 1000) return 'priority-red'
+  return 'priority-yellow'
 }
