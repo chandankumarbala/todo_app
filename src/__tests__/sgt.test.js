@@ -1,4 +1,4 @@
-import { todaySGT, priorityState } from '../utils/sgt'
+import { todaySGT, progressState, nextProgress } from '../utils/sgt'
 
 describe('todaySGT', () => {
   beforeEach(() => jest.useFakeTimers())
@@ -10,47 +10,34 @@ describe('todaySGT', () => {
   })
 })
 
-describe('priorityState', () => {
-  beforeEach(() => jest.useFakeTimers())
-  afterEach(() => jest.useRealTimers())
-
-  it('returns empty string when priority is 0', () => {
-    expect(priorityState(0, '2026-05-29T10:00:00Z')).toBe('')
+describe('progressState', () => {
+  it('returns empty string when progress is 0', () => {
+    expect(progressState(0)).toBe('')
   })
 
-  it('returns empty string when prioritySetAt is null', () => {
-    expect(priorityState(1, null)).toBe('')
+  it('returns empty string when progress is negative', () => {
+    expect(progressState(-1)).toBe('')
   })
 
-  it('returns empty string when prioritySetAt is undefined', () => {
-    expect(priorityState(1, undefined)).toBe('')
+  it('returns progress-yellow when progress is 20', () => {
+    expect(progressState(20)).toBe('progress-yellow')
   })
 
-  it('returns priority-yellow when age is less than 2 hours', () => {
-    const setAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T11:59:59Z'))
-    expect(priorityState(1, setAt)).toBe('priority-yellow')
+  it('returns progress-yellow when progress is 80', () => {
+    expect(progressState(80)).toBe('progress-yellow')
   })
 
-  it('returns priority-red when age is exactly 2 hours', () => {
-    const setAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T12:00:00Z'))
-    expect(priorityState(1, setAt)).toBe('priority-red')
+  it('returns progress-red when progress is 100', () => {
+    expect(progressState(100)).toBe('progress-red')
   })
+})
 
-  it('returns priority-red when age is more than 2 hours', () => {
-    const setAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T15:00:00Z'))
-    expect(priorityState(1, setAt)).toBe('priority-red')
-  })
-
-  it('returns empty string when prioritySetAt is an invalid date string', () => {
-    expect(priorityState(1, 'not-a-date')).toBe('')
-  })
-
-  it('returns empty string when priority is truthy non-1 value', () => {
-    const setAt = new Date('2026-05-29T10:00:00Z').toISOString()
-    jest.setSystemTime(new Date('2026-05-29T11:00:00Z'))
-    expect(priorityState(2, setAt)).toBe('')
-  })
+describe('nextProgress', () => {
+  it('0 → 20', () => expect(nextProgress(0)).toBe(20))
+  it('20 → 40', () => expect(nextProgress(20)).toBe(40))
+  it('40 → 60', () => expect(nextProgress(40)).toBe(60))
+  it('60 → 80', () => expect(nextProgress(60)).toBe(80))
+  it('80 → 100', () => expect(nextProgress(80)).toBe(100))
+  it('100 → 0 (wrap)', () => expect(nextProgress(100)).toBe(0))
+  it('invalid value → 0', () => expect(nextProgress(99)).toBe(0))
 })
