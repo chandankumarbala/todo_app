@@ -43,4 +43,14 @@ describe('priorityState', () => {
     jest.setSystemTime(new Date('2026-05-29T15:00:00Z'))
     expect(priorityState(1, setAt)).toBe('priority-red')
   })
+
+  it('returns empty string when prioritySetAt is an invalid date string', () => {
+    expect(priorityState(1, 'not-a-date')).toBe('')
+  })
+
+  it('returns empty string when priority is truthy non-1 value', () => {
+    const setAt = new Date('2026-05-29T10:00:00Z').toISOString()
+    jest.setSystemTime(new Date('2026-05-29T11:00:00Z'))
+    expect(priorityState(2, setAt)).toBe('')
+  })
 })

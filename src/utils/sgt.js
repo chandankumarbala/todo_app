@@ -12,8 +12,9 @@ export function todaySGT() {
  * @returns {'' | 'priority-yellow' | 'priority-red'}
  */
 export function priorityState(priority, prioritySetAt) {
-  if (!priority || !prioritySetAt) return ''
+  if (priority !== 1 || !prioritySetAt) return ''
   const ageMs = Date.now() - new Date(prioritySetAt).getTime()
+  if (isNaN(ageMs)) return ''
   if (ageMs >= 2 * 60 * 60 * 1000) return 'priority-red'
   return 'priority-yellow'
 }
