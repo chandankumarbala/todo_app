@@ -45,7 +45,7 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
               : pState === 'priority-red'    ? 'bg-red-100 border-red-300'
               : 'bg-gray-800 border-gray-700'
 
-  const textColor = pState ? 'text-gray-800' : 'text-gray-100'
+  const textColor = pState !== '' ? 'text-gray-800' : 'text-gray-100'
 
   const priorityTitle = pState === 'priority-red'    ? 'Remove priority — overdue!'
                       : pState === 'priority-yellow' ? 'Remove priority'
@@ -120,6 +120,8 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
       <button
         onClick={() => onTogglePriority(task.id)}
         title={priorityTitle}
+        aria-label={priorityTitle}
+        aria-pressed={pState !== ''}
         className={`text-sm px-1 ${priorityBtnClass}`}
       >⚑</button>
 

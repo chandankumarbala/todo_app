@@ -35,10 +35,13 @@ export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCrea
   function handleDragEnd(event) {
     const { active, over } = event
     if (!over || active.id === over.id) return
+    const activeTask = sorted.find(t => t.id === active.id)
+    const overTask = sorted.find(t => t.id === over.id)
+    if (activeTask?.priority === 1 || overTask?.priority === 1) return
     const oldIndex = sorted.findIndex((t) => t.id === active.id)
     const newIndex = sorted.findIndex((t) => t.id === over.id)
     const reordered = arrayMove(sorted, oldIndex, newIndex)
-    onReorder(reordered.map((t) => t.id))
+    onReorder(reordered.filter(t => t.priority !== 1).map(t => t.id))
   }
 
   return (
