@@ -1,8 +1,9 @@
+// src/components/TaskItem.jsx
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { progressState, todaySGT } from '@/utils/sgt'
+import { priorityProgress, priorityState, todaySGT } from '@/utils/sgt'
 
 function pieArc(pct) {
   if (pct <= 0 || pct >= 100) return null
@@ -14,14 +15,21 @@ function pieArc(pct) {
   return `M14,14 L14,3 A11,11 0 ${large},1 ${x},${y} Z`
 }
 
-export default function TaskItem({ task, onUpdate, onComplete, onDelete, onCycleProgress }) {
+export default function TaskItem({ task, onUpdate, onComplete, onDelete, onTogglePriority }) {
   const [editingText, setEditingText] = useState(false)
   const [editingDate, setEditingDate] = useState(false)
   const [textVal, setTextVal] = useState(task.text)
   const [dateVal, setDateVal] = useState(task.deadline || todaySGT())
+  const [now, setNow] = useState(Date.now())
 
-  const progress = task.progress ?? 0
-  const pState = progressState(progress)
+  useEffect(() => {
+    if (!task.priority) return
+    const id = setInterval(() => setNow(Date.now()), 30_000)
+    return () => clearInterval(id)
+  }, [task.priority])
+
+  const progress = priorityProgress(task.priority, task.priority_set_at, now)
+  const pState = priorityState(task.priority, task.priority_set_at, now)
 
   const {
     attributes,
@@ -52,16 +60,16 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onCycle
     setEditingDate(false)
   }
 
-  const rowBg = pState === 'progress-yellow' ? 'bg-yellow-300 border-yellow-400'
-              : pState === 'progress-red'    ? 'bg-red-100 border-red-300'
+  const rowBg = pState === 'priority-yellow' ? 'bg-yellow-300 border-yellow-400'
+              : pState === 'priority-red'    ? 'bg-red-100 border-red-300'
               : 'bg-gray-800 border-gray-700'
 
   const textColor = pState !== '' ? 'text-gray-800' : 'text-gray-100'
 
   const circleTitle =
-    progress === 0  ? 'Set progress' :
-    progress >= 100 ? 'Reset progress (100% — needs attention!)' :
-                      `Progress: ${progress}%`
+    !task.priority    ? 'Start 2-hour timer' :
+    progress >= 100   ? 'Reset timer (overdue!)' :
+                        `Timer running — ${Math.round(progress)}% elapsed (click to reset)`
 
   return (
     <div
@@ -126,10 +134,10 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onCycle
       </div>
 
       <button
-        onClick={() => onCycleProgress(task.id)}
+        onClick={() => onTogglePriority(task.id)}
         title={circleTitle}
         aria-label={circleTitle}
-        aria-pressed={progress > 0}
+        aria-pressed={!!task.priority}
         className="p-0.5 rounded-full hover:bg-white/10 transition-colors"
       >
         <svg
