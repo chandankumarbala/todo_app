@@ -36,8 +36,11 @@ export function useTasks() {
   async function togglePriority(id) {
     const task = (data || []).find(t => t.id === id)
     if (!task) return
-    await apiTogglePriority(id, task.priority !== 1)
-    await mutate()
+    try {
+      await apiTogglePriority(id, task.priority !== 1)
+    } finally {
+      await mutate()
+    }
   }
 
   const pending = (data || []).filter((t) => !t.completed)
