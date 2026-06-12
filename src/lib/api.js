@@ -110,23 +110,16 @@ export async function reorderTasks(orderedIds) {
   })
 }
 
-export async function togglePriority(id, priorityOn) {
-  const changes = priorityOn
-    ? { priority: 1, priority_set_at: nowSGT() }
-    : { priority: 0, priority_set_at: null }
-
+export async function updateProgress(id, progress) {
   if (isTauri()) {
     const db = await getDB()
-    await db.execute(
-      'UPDATE tasks SET priority=$1, priority_set_at=$2 WHERE id=$3',
-      [changes.priority, changes.priority_set_at, id]
-    )
+    await db.execute('UPDATE tasks SET progress=$1 WHERE id=$2', [progress, id])
     return
   }
   const res = await fetch(`/api/tasks/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(changes),
+    body: JSON.stringify({ progress }),
   })
-  if (!res.ok) throw new Error('Failed to toggle priority')
+  if (!res.ok) throw new Error('Failed to update progress')
 }
