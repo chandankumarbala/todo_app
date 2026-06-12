@@ -17,7 +17,7 @@ import {
 import TaskItem from './TaskItem'
 import NewTaskRow from './NewTaskRow'
 
-export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCreate, onReorder }) {
+export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCreate, onReorder, onTogglePriority }) {
   const [adding, setAdding] = useState(false)
 
   const sensors = useSensors(
@@ -25,12 +25,19 @@ export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCrea
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
+  const sorted = [
+    ...tasks.filter(t => t.priority === 1).sort((a, b) =>
+      new Date(b.priority_set_at) - new Date(a.priority_set_at)
+    ),
+    ...tasks.filter(t => t.priority !== 1),
+  ]
+
   function handleDragEnd(event) {
     const { active, over } = event
     if (!over || active.id === over.id) return
-    const oldIndex = tasks.findIndex((t) => t.id === active.id)
-    const newIndex = tasks.findIndex((t) => t.id === over.id)
-    const reordered = arrayMove(tasks, oldIndex, newIndex)
+    const oldIndex = sorted.findIndex((t) => t.id === active.id)
+    const newIndex = sorted.findIndex((t) => t.id === over.id)
+    const reordered = arrayMove(sorted, oldIndex, newIndex)
     onReorder(reordered.map((t) => t.id))
   }
 
@@ -53,14 +60,15 @@ export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCrea
         }}
       >
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-            {tasks.map((task) => (
+          <SortableContext items={sorted.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+            {sorted.map((task) => (
               <TaskItem
                 key={task.id}
                 task={task}
                 onUpdate={onUpdate}
                 onComplete={onComplete}
                 onDelete={onDelete}
+                onTogglePriority={onTogglePriority}
               />
             ))}
           </SortableContext>

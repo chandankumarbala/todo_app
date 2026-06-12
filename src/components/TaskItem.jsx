@@ -2,15 +2,15 @@
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { urgencyClass, todaySGT } from '@/utils/sgt'
+import { priorityState, todaySGT } from '@/utils/sgt'
 
-export default function TaskItem({ task, onUpdate, onComplete, onDelete }) {
+export default function TaskItem({ task, onUpdate, onComplete, onDelete, onTogglePriority }) {
   const [editingText, setEditingText] = useState(false)
   const [editingDate, setEditingDate] = useState(false)
   const [textVal, setTextVal] = useState(task.text)
   const [dateVal, setDateVal] = useState(task.deadline || todaySGT())
 
-  const urgency = urgencyClass(task.created_at)
+  const pState = priorityState(task.priority, task.priority_set_at)
 
   const {
     attributes,
@@ -41,20 +41,26 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete }) {
     setEditingDate(false)
   }
 
-  const urgencyBg = {
-    'urgency-yellow': 'bg-yellow-300 border-yellow-400',
-    'urgency-red': 'bg-red-100 border-red-300',
-    '': 'bg-gray-800 border-gray-700',
-  }[urgency]
+  const rowBg = pState === 'priority-yellow' ? 'bg-yellow-300 border-yellow-400'
+              : pState === 'priority-red'    ? 'bg-red-100 border-red-300'
+              : 'bg-gray-800 border-gray-700'
 
-  const textColor = urgency === 'urgency-yellow' ? 'text-gray-800' : urgency === 'urgency-red' ? 'text-gray-900' : 'text-gray-100'
+  const textColor = pState ? 'text-gray-800' : 'text-gray-100'
+
+  const priorityTitle = pState === 'priority-red'    ? 'Remove priority — overdue!'
+                      : pState === 'priority-yellow' ? 'Remove priority'
+                      : 'Set priority'
+
+  const priorityBtnClass = pState === 'priority-red'    ? 'text-red-500 animate-pulse'
+                         : pState === 'priority-yellow' ? 'text-yellow-600'
+                         : 'text-gray-500 hover:text-yellow-400'
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       data-testid={`task-item-${task.id}`}
-      className={`flex items-center gap-1 px-2 py-1.5 mb-1 rounded border ${urgencyBg} group`}
+      className={`flex items-center gap-1 px-2 py-1.5 mb-1 rounded border ${rowBg} group`}
     >
       <span
         {...attributes}
@@ -80,6 +86,7 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete }) {
           <span
             className={`text-sm cursor-pointer truncate block ${textColor}`}
             onClick={() => setEditingText(true)}
+            title="Click to edit"
           >
             {task.text}
           </span>
@@ -99,8 +106,9 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete }) {
           />
         ) : (
           <span
-            className={`text-xs cursor-pointer ${urgency ? 'text-gray-700' : 'text-gray-400'} hover:text-gray-200`}
+            className={`text-xs cursor-pointer ${pState ? 'text-gray-700' : 'text-gray-400'} hover:text-gray-200`}
             onClick={() => setEditingDate(true)}
+            title="Set deadline"
           >
             {task.deadline
               ? new Date(task.deadline + 'T00:00:00').toLocaleDateString('en-SG', { day: '2-digit', month: 'short' })
@@ -108,6 +116,12 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete }) {
           </span>
         )}
       </div>
+
+      <button
+        onClick={() => onTogglePriority(task.id)}
+        title={priorityTitle}
+        className={`text-sm px-1 ${priorityBtnClass}`}
+      >⚑</button>
 
       <button
         onClick={() => onComplete(task.id)}
