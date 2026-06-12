@@ -24,6 +24,8 @@ function getDb(path) {
       created_at   TEXT NOT NULL
     )
   `)
+  try { db.exec('ALTER TABLE tasks ADD COLUMN priority INTEGER NOT NULL DEFAULT 0') } catch (_) {}
+  try { db.exec('ALTER TABLE tasks ADD COLUMN priority_set_at TEXT') } catch (_) {}
   instances[path] = db
   return db
 }
