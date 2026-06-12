@@ -1,3 +1,4 @@
+// src/components/TaskList.jsx
 'use client'
 import { useState } from 'react'
 import {
@@ -17,7 +18,7 @@ import {
 import TaskItem from './TaskItem'
 import NewTaskRow from './NewTaskRow'
 
-export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCreate, onReorder, onCycleProgress }) {
+export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCreate, onReorder, onTogglePriority }) {
   const [adding, setAdding] = useState(false)
 
   const sensors = useSensors(
@@ -26,8 +27,10 @@ export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCrea
   )
 
   const sorted = [
-    ...tasks.filter(t => t.progress > 0).sort((a, b) => b.progress - a.progress),
-    ...tasks.filter(t => !t.progress),
+    ...tasks.filter(t => t.priority).sort((a, b) =>
+      new Date(b.priority_set_at) - new Date(a.priority_set_at)
+    ),
+    ...tasks.filter(t => !t.priority),
   ]
 
   function handleDragEnd(event) {
@@ -35,11 +38,11 @@ export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCrea
     if (!over || active.id === over.id) return
     const activeTask = sorted.find(t => t.id === active.id)
     const overTask = sorted.find(t => t.id === over.id)
-    if (activeTask?.progress > 0 || overTask?.progress > 0) return
+    if (activeTask?.priority || overTask?.priority) return
     const oldIndex = sorted.findIndex((t) => t.id === active.id)
     const newIndex = sorted.findIndex((t) => t.id === over.id)
     const reordered = arrayMove(sorted, oldIndex, newIndex)
-    onReorder(reordered.filter(t => !t.progress).map(t => t.id))
+    onReorder(reordered.filter(t => !t.priority).map(t => t.id))
   }
 
   return (
@@ -69,7 +72,7 @@ export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCrea
                 onUpdate={onUpdate}
                 onComplete={onComplete}
                 onDelete={onDelete}
-                onCycleProgress={onCycleProgress}
+                onTogglePriority={onTogglePriority}
               />
             ))}
           </SortableContext>
