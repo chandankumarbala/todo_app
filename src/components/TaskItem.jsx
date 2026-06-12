@@ -134,6 +134,7 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onCycle
       >
         <svg
           width="20" height="20" viewBox="0 0 28 28"
+          aria-hidden="true"
           className={progress >= 100 ? 'animate-pulse' : ''}
         >
           {progress <= 0 && (
