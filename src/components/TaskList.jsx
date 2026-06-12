@@ -17,19 +17,17 @@ import {
 import TaskItem from './TaskItem'
 import NewTaskRow from './NewTaskRow'
 
-export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCreate, onReorder, onTogglePriority }) {
+export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCreate, onReorder, onCycleProgress }) {
   const [adding, setAdding] = useState(false)
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
   const sorted = [
-    ...tasks.filter(t => t.priority === 1).sort((a, b) =>
-      new Date(b.priority_set_at) - new Date(a.priority_set_at)
-    ),
-    ...tasks.filter(t => t.priority !== 1),
+    ...tasks.filter(t => t.progress > 0).sort((a, b) => b.progress - a.progress),
+    ...tasks.filter(t => !t.progress),
   ]
 
   function handleDragEnd(event) {
@@ -37,11 +35,11 @@ export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCrea
     if (!over || active.id === over.id) return
     const activeTask = sorted.find(t => t.id === active.id)
     const overTask = sorted.find(t => t.id === over.id)
-    if (activeTask?.priority === 1 || overTask?.priority === 1) return
+    if (activeTask?.progress > 0 || overTask?.progress > 0) return
     const oldIndex = sorted.findIndex((t) => t.id === active.id)
     const newIndex = sorted.findIndex((t) => t.id === over.id)
     const reordered = arrayMove(sorted, oldIndex, newIndex)
-    onReorder(reordered.filter(t => t.priority !== 1).map(t => t.id))
+    onReorder(reordered.filter(t => !t.progress).map(t => t.id))
   }
 
   return (
@@ -71,7 +69,7 @@ export default function TaskList({ tasks, onUpdate, onComplete, onDelete, onCrea
                 onUpdate={onUpdate}
                 onComplete={onComplete}
                 onDelete={onDelete}
-                onTogglePriority={onTogglePriority}
+                onCycleProgress={onCycleProgress}
               />
             ))}
           </SortableContext>
