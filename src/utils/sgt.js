@@ -6,25 +6,28 @@ export function todaySGT() {
 }
 
 /**
- * Returns progress display state for a pending task.
- * @param {number} progress - 0, 20, 40, 60, 80, or 100
- * @returns {'' | 'progress-yellow' | 'progress-red'}
+ * Returns 0–100 fill percentage based on elapsed time since prioritySetAt.
+ * Fills over 2 hours (7200000ms). Returns 0 if priority is off or timestamp missing.
+ * @param {number} priority - 0 or 1
+ * @param {string|null} prioritySetAt - ISO timestamp string
+ * @param {number} now - current time in ms (default: Date.now())
+ * @returns {number} 0–100
  */
-export function progressState(progress) {
-  if (!progress || progress <= 0) return ''
-  if (progress >= 100) return 'progress-red'
-  return 'progress-yellow'
+export function priorityProgress(priority, prioritySetAt, now = Date.now()) {
+  if (!priority || !prioritySetAt) return 0
+  const elapsed = now - new Date(prioritySetAt).getTime()
+  if (isNaN(elapsed) || elapsed < 0) return 0
+  return Math.min(100, (elapsed / 7_200_000) * 100)
 }
 
-const PROGRESS_STEPS = [0, 20, 40, 60, 80, 100]
-
 /**
- * Returns the next progress step after current (wraps 100 → 0).
- * @param {number} current - current progress value
- * @returns {number} next step
+ * Returns row/circle display state based on priority timer.
+ * @param {number} priority - 0 or 1
+ * @param {string|null} prioritySetAt - ISO timestamp string
+ * @param {number} now - current time in ms (default: Date.now())
+ * @returns {'' | 'priority-yellow' | 'priority-red'}
  */
-export function nextProgress(current) {
-  const idx = PROGRESS_STEPS.indexOf(current)
-  if (idx === -1) return 0
-  return PROGRESS_STEPS[(idx + 1) % PROGRESS_STEPS.length]
+export function priorityState(priority, prioritySetAt, now = Date.now()) {
+  if (!priority || !prioritySetAt) return ''
+  return priorityProgress(priority, prioritySetAt, now) >= 100 ? 'priority-red' : 'priority-yellow'
 }
