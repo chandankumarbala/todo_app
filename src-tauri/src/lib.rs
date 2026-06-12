@@ -26,6 +26,12 @@ pub fn run() {
             sql: "ALTER TABLE tasks ADD COLUMN priority INTEGER NOT NULL DEFAULT 0; ALTER TABLE tasks ADD COLUMN priority_set_at TEXT;",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "add_progress",
+            sql: "ALTER TABLE tasks ADD COLUMN progress INTEGER NOT NULL DEFAULT 0;",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
