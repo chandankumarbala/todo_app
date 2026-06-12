@@ -4,6 +4,12 @@ const nodePath = require('path')
 
 const instances = {}
 
+function addColumnIfMissing(db, sql) {
+  try { db.exec(sql) } catch (e) {
+    if (!e.message.includes('duplicate column name')) throw e
+  }
+}
+
 function getDb(path) {
   if (instances[path]) return instances[path]
 
@@ -24,8 +30,8 @@ function getDb(path) {
       created_at   TEXT NOT NULL
     )
   `)
-  try { db.exec('ALTER TABLE tasks ADD COLUMN priority INTEGER NOT NULL DEFAULT 0') } catch (_) {}
-  try { db.exec('ALTER TABLE tasks ADD COLUMN priority_set_at TEXT') } catch (_) {}
+  addColumnIfMissing(db, 'ALTER TABLE tasks ADD COLUMN priority INTEGER NOT NULL DEFAULT 0')
+  addColumnIfMissing(db, 'ALTER TABLE tasks ADD COLUMN priority_set_at TEXT')
   instances[path] = db
   return db
 }
