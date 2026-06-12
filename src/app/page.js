@@ -4,7 +4,7 @@ import TaskList from '@/components/TaskList'
 import CompletedList from '@/components/CompletedList'
 
 export default function Home() {
-  const { pending, completed, isLoading, error, createTask, updateTask, deleteTask, reorderTasks, completeTask, cycleProgress } = useTasks()
+  const { pending, completed, isLoading, error, createTask, updateTask, deleteTask, reorderTasks, completeTask, startOrResetPriority } = useTasks()
 
   if (isLoading) {
     return (
@@ -61,7 +61,7 @@ export default function Home() {
         onDelete={deleteTask}
         onCreate={createTask}
         onReorder={reorderTasks}
-        onCycleProgress={cycleProgress}
+        onTogglePriority={startOrResetPriority}
       />
 
       {/* Completed panel */}
