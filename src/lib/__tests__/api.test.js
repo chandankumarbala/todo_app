@@ -1,5 +1,5 @@
 // Tests fetch path only (isTauri() returns false in JSDOM since window.__TAURI_INTERNALS__ is undefined)
-import { getTasks, createTask, updateTask, deleteTask, reorderTasks } from '../api'
+import { getTasks, createTask, updateTask, deleteTask, reorderTasks, togglePriority } from '../api'
 
 const mockJson = jest.fn()
 const mockFetch = jest.fn(() => Promise.resolve({ ok: true, json: mockJson, status: 200 }))
@@ -43,5 +43,24 @@ test('reorderTasks calls PATCH /api/tasks/reorder', async () => {
   expect(mockFetch).toHaveBeenCalledWith('/api/tasks/reorder', expect.objectContaining({
     method: 'PATCH',
     body: JSON.stringify({ order: [2, 1, 3] }),
+  }))
+})
+
+test('togglePriority on — calls PATCH /api/tasks/:id with priority=1', async () => {
+  jest.useFakeTimers()
+  jest.setSystemTime(new Date('2026-06-12T10:00:00+08:00'))
+  await togglePriority(7, true)
+  expect(mockFetch).toHaveBeenCalledWith('/api/tasks/7', expect.objectContaining({
+    method: 'PATCH',
+    body: expect.stringContaining('"priority":1'),
+  }))
+  jest.useRealTimers()
+})
+
+test('togglePriority off — calls PATCH /api/tasks/:id with priority=0', async () => {
+  await togglePriority(7, false)
+  expect(mockFetch).toHaveBeenCalledWith('/api/tasks/7', expect.objectContaining({
+    method: 'PATCH',
+    body: JSON.stringify({ priority: 0, priority_set_at: null }),
   }))
 })

@@ -4,7 +4,7 @@ import TaskList from '@/components/TaskList'
 import CompletedList from '@/components/CompletedList'
 
 export default function Home() {
-  const { pending, completed, isLoading, error, createTask, updateTask, deleteTask, reorderTasks, completeTask } = useTasks()
+  const { pending, completed, isLoading, error, createTask, updateTask, deleteTask, reorderTasks, completeTask, togglePriority } = useTasks()
 
   if (isLoading) {
     return (
@@ -53,7 +53,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Pending panel — grows to fill space */}
+      {/* Pending panel */}
       <TaskList
         tasks={pending}
         onUpdate={updateTask}
@@ -61,9 +61,10 @@ export default function Home() {
         onDelete={deleteTask}
         onCreate={createTask}
         onReorder={reorderTasks}
+        onTogglePriority={togglePriority}
       />
 
-      {/* Completed panel — fixed at bottom */}
+      {/* Completed panel */}
       <CompletedList tasks={completed} onDelete={deleteTask} />
     </div>
   )

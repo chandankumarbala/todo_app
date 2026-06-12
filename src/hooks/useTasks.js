@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { getTasks, createTask as apiCreateTask, updateTask as apiUpdateTask, deleteTask as apiDeleteTask, reorderTasks as apiReorderTasks } from '@/lib/api'
+import { getTasks, createTask as apiCreateTask, updateTask as apiUpdateTask, deleteTask as apiDeleteTask, reorderTasks as apiReorderTasks, togglePriority as apiTogglePriority } from '@/lib/api'
 
 const fetcher = () => getTasks()
 
@@ -33,6 +33,13 @@ export function useTasks() {
     await updateTask(id, { completed: 1, completed_at: sgtNow })
   }
 
+  async function togglePriority(id) {
+    const task = (data || []).find(t => t.id === id)
+    if (!task) return
+    await apiTogglePriority(id, task.priority !== 1)
+    await mutate()
+  }
+
   const pending = (data || []).filter((t) => !t.completed)
   const completed = (data || []).filter((t) => t.completed)
 
@@ -46,5 +53,6 @@ export function useTasks() {
     deleteTask,
     reorderTasks,
     completeTask,
+    togglePriority,
   }
 }
