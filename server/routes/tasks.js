@@ -42,7 +42,7 @@ module.exports = function tasksRouter(db) {
   })
 
   router.patch('/:id', (req, res) => {
-    const { text, deadline, completed, completed_at, position, progress } = req.body
+    const { text, deadline, completed, completed_at, position, priority, priority_set_at } = req.body
     const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id)
     if (!task) return res.status(404).json({ error: 'not found' })
 
@@ -52,13 +52,14 @@ module.exports = function tasksRouter(db) {
       completed: completed !== undefined ? completed : task.completed,
       completed_at: completed_at !== undefined ? completed_at : task.completed_at,
       position: position !== undefined ? position : task.position,
-      progress: progress !== undefined ? progress : (task.progress ?? 0),
+      priority: priority !== undefined ? priority : (task.priority ?? 0),
+      priority_set_at: priority_set_at !== undefined ? priority_set_at : task.priority_set_at,
     }
     db.prepare(
-      'UPDATE tasks SET text=?, deadline=?, completed=?, completed_at=?, position=?, progress=? WHERE id=?'
+      'UPDATE tasks SET text=?, deadline=?, completed=?, completed_at=?, position=?, priority=?, priority_set_at=? WHERE id=?'
     ).run(
       updated.text, updated.deadline, updated.completed, updated.completed_at,
-      updated.position, updated.progress, task.id
+      updated.position, updated.priority, updated.priority_set_at, task.id
     )
 
     res.json(db.prepare('SELECT * FROM tasks WHERE id = ?').get(task.id))

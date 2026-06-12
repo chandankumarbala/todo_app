@@ -81,39 +81,31 @@ describe('Tasks API', () => {
     expect(pending[1].id).toBe(a.body.id)
   })
 
-  it('PATCH /api/tasks/:id sets progress on a task', async () => {
+  it('PATCH /api/tasks/:id sets priority on a task', async () => {
     const created = await request(app)
       .post('/api/tasks')
-      .send({ text: 'Progress task', deadline: null })
+      .send({ text: 'Priority task', deadline: null })
+    const now = '2026-06-13T10:00:00.000Z'
     const res = await request(app)
       .patch(`/api/tasks/${created.body.id}`)
-      .send({ progress: 40 })
+      .send({ priority: 1, priority_set_at: now })
     expect(res.status).toBe(200)
-    expect(res.body.progress).toBe(40)
+    expect(res.body.priority).toBe(1)
+    expect(res.body.priority_set_at).toBe(now)
   })
 
-  it('PATCH /api/tasks/:id sets progress to 100', async () => {
+  it('PATCH /api/tasks/:id resets priority to 0', async () => {
     const created = await request(app)
       .post('/api/tasks')
-      .send({ text: 'Progress task', deadline: null })
-    const res = await request(app)
-      .patch(`/api/tasks/${created.body.id}`)
-      .send({ progress: 100 })
-    expect(res.status).toBe(200)
-    expect(res.body.progress).toBe(100)
-  })
-
-  it('PATCH /api/tasks/:id resets progress to 0', async () => {
-    const created = await request(app)
-      .post('/api/tasks')
-      .send({ text: 'Progress task', deadline: null })
+      .send({ text: 'Priority task', deadline: null })
     await request(app)
       .patch(`/api/tasks/${created.body.id}`)
-      .send({ progress: 60 })
+      .send({ priority: 1, priority_set_at: '2026-06-13T10:00:00.000Z' })
     const res = await request(app)
       .patch(`/api/tasks/${created.body.id}`)
-      .send({ progress: 0 })
+      .send({ priority: 0, priority_set_at: null })
     expect(res.status).toBe(200)
-    expect(res.body.progress).toBe(0)
+    expect(res.body.priority).toBe(0)
+    expect(res.body.priority_set_at).toBeNull()
   })
 })
