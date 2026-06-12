@@ -32,6 +32,7 @@ function getDb(path) {
   `)
   addColumnIfMissing(db, 'ALTER TABLE tasks ADD COLUMN priority INTEGER NOT NULL DEFAULT 0')
   addColumnIfMissing(db, 'ALTER TABLE tasks ADD COLUMN priority_set_at TEXT')
+  addColumnIfMissing(db, 'ALTER TABLE tasks ADD COLUMN progress INTEGER NOT NULL DEFAULT 0')
   instances[path] = db
   return db
 }
