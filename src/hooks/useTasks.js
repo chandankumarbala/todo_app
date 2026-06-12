@@ -1,5 +1,6 @@
 import useSWR from 'swr'
-import { getTasks, createTask as apiCreateTask, updateTask as apiUpdateTask, deleteTask as apiDeleteTask, reorderTasks as apiReorderTasks, togglePriority as apiTogglePriority } from '@/lib/api'
+import { getTasks, createTask as apiCreateTask, updateTask as apiUpdateTask, deleteTask as apiDeleteTask, reorderTasks as apiReorderTasks, updateProgress as apiUpdateProgress } from '@/lib/api'
+import { nextProgress } from '@/utils/sgt'
 
 const fetcher = () => getTasks()
 
@@ -33,11 +34,11 @@ export function useTasks() {
     await updateTask(id, { completed: 1, completed_at: sgtNow })
   }
 
-  async function togglePriority(id) {
+  async function cycleProgress(id) {
     const task = (data || []).find(t => t.id === id)
     if (!task) return
     try {
-      await apiTogglePriority(id, task.priority !== 1)
+      await apiUpdateProgress(id, nextProgress(task.progress ?? 0))
     } finally {
       await mutate()
     }
@@ -56,6 +57,6 @@ export function useTasks() {
     deleteTask,
     reorderTasks,
     completeTask,
-    togglePriority,
+    cycleProgress,
   }
 }
