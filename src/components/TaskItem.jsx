@@ -136,8 +136,7 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
       </div>
 
       <button
-        onClick={() => onTogglePriority(task.id)}
-        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
+        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); onTogglePriority(task.id) }}
         title={circleTitle}
         aria-label={circleTitle}
         aria-pressed={!!task.priority}
@@ -167,15 +166,13 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
       </button>
 
       <button
-        onClick={() => onComplete(task.id)}
-        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
+        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); onComplete(task.id) }}
         className="text-green-400 hover:text-green-300 text-sm px-1"
         title="Mark complete"
       >✓</button>
 
       <button
-        onClick={() => onDelete(task.id)}
-        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
+        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); onDelete(task.id) }}
         className="text-red-500 hover:text-red-400 font-bold text-sm px-1 opacity-0 group-hover:opacity-100 transition-opacity"
         title="Delete task"
       >🗑</button>
