@@ -1,13 +1,46 @@
 'use client'
 import { useEffect } from 'react'
 
+/**
+ * Pure slide engine — exported for testing.
+ * Returns { slideTo, getCurrentX }.
+ * setPosition(x) is called fire-and-forget each tick.
+ */
+export function makeSlideTo({ startX, setPosition, stepPx = 30, intervalMs = 8 }) {
+  let currentX = startX
+  let slideToken = 0
+  let intervalId = null
+
+  function slideTo(targetX) {
+    const token = ++slideToken
+    if (intervalId) { clearInterval(intervalId); intervalId = null }
+
+    intervalId = setInterval(() => {
+      if (token !== slideToken) { clearInterval(intervalId); return }
+      const diff = targetX - currentX
+      if (Math.abs(diff) < 2) {
+        currentX = targetX
+        setPosition(targetX)
+        clearInterval(intervalId); intervalId = null
+        return
+      }
+      currentX += diff > 0 ? Math.min(stepPx, diff) : Math.max(-stepPx, diff)
+      setPosition(Math.round(currentX))
+    }, intervalMs)
+  }
+
+  function getCurrentX() { return currentX }
+
+  return { slideTo, getCurrentX }
+}
+
 export function useWindowSlide() {
   useEffect(() => {
     if (typeof window === 'undefined' || !window.__TAURI_INTERNALS__) return
 
-    let intervalId = null
     let unlistenBlur = null
     let unlistenFocus = null
+    let blurTimer = null
     let aborted = false
 
     async function init() {
@@ -22,41 +55,30 @@ export function useWindowSlide() {
       const screenWidth = monitor.size.width / scaleFactor
       const screenHeight = monitor.size.height / scaleFactor
       const winWidth = Math.round(screenWidth * 0.3)
-      const MENU_BAR = 28 // macOS menu bar height (logical px)
+      const MENU_BAR = 28
 
       await win.setSize(new LogicalSize(winWidth, screenHeight - MENU_BAR))
       await win.setPosition(new LogicalPosition(screenWidth - winWidth, MENU_BAR))
 
-      function slideTo(targetX) {
-        if (intervalId) { clearTimeout(intervalId); intervalId = null }
-        const step = async () => {
-          const phys = await win.outerPosition()
-          const currentX = phys.x / scaleFactor
-          const diff = targetX - currentX
-          if (Math.abs(diff) < 2) {
-            await win.setPosition(new LogicalPosition(targetX, MENU_BAR))
-            intervalId = null
-            return
-          }
-          const move = diff > 0 ? Math.min(30, diff) : Math.max(-30, diff)
-          await win.setPosition(new LogicalPosition(Math.round(currentX + move), MENU_BAR))
-          intervalId = setTimeout(step, 8)
-        }
-        intervalId = setTimeout(step, 8)
-      }
+      const { slideTo } = makeSlideTo({
+        startX: screenWidth - winWidth,
+        setPosition: (x) => win.setPosition(new LogicalPosition(x, MENU_BAR)),
+      })
 
       unlistenBlur = await win.listen('tauri://blur', () => {
-        slideTo(screenWidth - 3)
+        clearTimeout(blurTimer)
+        blurTimer = setTimeout(() => slideTo(screenWidth - 3), 150)
       })
 
       unlistenFocus = await win.listen('tauri://focus', () => {
+        clearTimeout(blurTimer)
         slideTo(screenWidth - winWidth)
       })
 
       if (aborted) {
-        if (intervalId) { clearTimeout(intervalId); intervalId = null }
-        unlistenBlur()
-        unlistenFocus()
+        clearTimeout(blurTimer)
+        if (unlistenBlur) unlistenBlur()
+        if (unlistenFocus) unlistenFocus()
       }
     }
 
@@ -64,7 +86,7 @@ export function useWindowSlide() {
 
     return () => {
       aborted = true
-      if (intervalId) { clearTimeout(intervalId); intervalId = null }
+      clearTimeout(blurTimer)
       if (unlistenBlur) unlistenBlur()
       if (unlistenFocus) unlistenFocus()
     }
