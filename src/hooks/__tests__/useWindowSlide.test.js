@@ -1,7 +1,6 @@
-// src/hooks/__tests__/useWindowSlide.test.js
 import { makeSlideTo } from '../useWindowSlide'
 
-describe('makeSlideTo token guard', () => {
+describe('makeSlideTo', () => {
   beforeEach(() => jest.useFakeTimers())
   afterEach(() => jest.useRealTimers())
 
@@ -16,19 +15,16 @@ describe('makeSlideTo token guard', () => {
       intervalMs: 8,
     })
 
-    slideTo(400)          // start sliding right
-    jest.advanceTimersByTime(8)   // one tick: currentX moves toward 400
-    slideTo(100)          // interrupt — slide back left
+    slideTo(400)
+    jest.advanceTimersByTime(8)   // one tick toward 400
+    slideTo(100)                  // interrupt — slide back
     const countAfterInterrupt = mockSetPosition.mock.calls.length
-    jest.advanceTimersByTime(200) // run out remaining ticks
+    jest.advanceTimersByTime(200)
     const countAfterDrain = mockSetPosition.mock.calls.length
 
-    // After interrupt, only the NEW animation's ticks should fire
-    const newAnimationCalls = countAfterDrain - countAfterInterrupt
-    expect(newAnimationCalls).toBeGreaterThan(0) // new animation ran
-    // After drain, position is near 100 (slid back), not 400
+    expect(countAfterDrain - countAfterInterrupt).toBeGreaterThan(0)
     const lastPos = positions[positions.length - 1]
-    expect(lastPos).toBeLessThanOrEqual(102)
+    expect(lastPos).toBe(100)
   })
 
   it('settles at exact targetX', () => {
@@ -47,5 +43,23 @@ describe('makeSlideTo token guard', () => {
 
     const lastPos = positions[positions.length - 1]
     expect(lastPos).toBe(50)
+  })
+
+  it('stop() cancels in-flight animation', () => {
+    const mockSetPosition = jest.fn()
+
+    const { slideTo, stop } = makeSlideTo({
+      startX: 0,
+      setPosition: mockSetPosition,
+      stepPx: 30,
+      intervalMs: 8,
+    })
+
+    slideTo(500)
+    jest.advanceTimersByTime(8)   // one tick
+    stop()
+    const callsAtStop = mockSetPosition.mock.calls.length
+    jest.advanceTimersByTime(200) // no more ticks should fire
+    expect(mockSetPosition.mock.calls.length).toBe(callsAtStop)
   })
 })
