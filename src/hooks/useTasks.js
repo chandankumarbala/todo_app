@@ -6,6 +6,8 @@ const fetcher = () => getTasks()
 export function useTasks() {
   const { data, error, mutate } = useSWR('/api/tasks', fetcher, {
     refreshInterval: 60000,
+    errorRetryCount: 5,
+    errorRetryInterval: 1000,
   })
 
   async function createTask(text, deadline) {
