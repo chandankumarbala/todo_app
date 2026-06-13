@@ -63,10 +63,12 @@ export async function updateTask(id, changes) {
       completed: changes.completed !== undefined ? changes.completed : task.completed,
       completed_at: changes.completed_at !== undefined ? changes.completed_at : task.completed_at,
       position: changes.position !== undefined ? changes.position : task.position,
+      priority: changes.priority !== undefined ? changes.priority : (task.priority ?? 0),
+      priority_set_at: changes.priority_set_at !== undefined ? changes.priority_set_at : task.priority_set_at,
     }
     await db.execute(
-      'UPDATE tasks SET text=$1, deadline=$2, completed=$3, completed_at=$4, position=$5 WHERE id=$6',
-      [updated.text, updated.deadline, updated.completed, updated.completed_at, updated.position, id]
+      'UPDATE tasks SET text=$1, deadline=$2, completed=$3, completed_at=$4, position=$5, priority=$6, priority_set_at=$7 WHERE id=$8',
+      [updated.text, updated.deadline, updated.completed, updated.completed_at, updated.position, updated.priority, updated.priority_set_at, id]
     )
     return
   }
