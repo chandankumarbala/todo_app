@@ -38,6 +38,8 @@ export function useTasks() {
   async function startOrResetPriority(id) {
     try {
       await apiTogglePriority(id, true)
+    } catch (e) {
+      console.error('togglePriority failed:', e)
     } finally {
       await mutate()
     }
