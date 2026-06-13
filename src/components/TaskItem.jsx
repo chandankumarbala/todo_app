@@ -102,7 +102,7 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
           <span
             className={`text-sm cursor-pointer truncate block ${textColor}`}
             onClick={() => setEditingText(true)}
-            onPointerDown={e => e.stopPropagation()}
+            onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
             title="Click to edit"
           >
             {task.text}
@@ -125,7 +125,7 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
           <span
             className={`text-xs cursor-pointer ${pState ? 'text-gray-700' : 'text-gray-400'} hover:text-gray-200`}
             onClick={() => setEditingDate(true)}
-            onPointerDown={e => e.stopPropagation()}
+            onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
             title="Set deadline"
           >
             {task.deadline
@@ -137,7 +137,7 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
 
       <button
         onClick={() => onTogglePriority(task.id)}
-        onPointerDown={e => e.stopPropagation()}
+        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
         title={circleTitle}
         aria-label={circleTitle}
         aria-pressed={!!task.priority}
@@ -168,14 +168,14 @@ export default function TaskItem({ task, onUpdate, onComplete, onDelete, onToggl
 
       <button
         onClick={() => onComplete(task.id)}
-        onPointerDown={e => e.stopPropagation()}
+        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
         className="text-green-400 hover:text-green-300 text-sm px-1"
         title="Mark complete"
       >✓</button>
 
       <button
         onClick={() => onDelete(task.id)}
-        onPointerDown={e => e.stopPropagation()}
+        onPointerDown={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
         className="text-red-500 hover:text-red-400 font-bold text-sm px-1 opacity-0 group-hover:opacity-100 transition-opacity"
         title="Delete task"
       >🗑</button>
