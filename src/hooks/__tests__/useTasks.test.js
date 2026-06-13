@@ -1,5 +1,5 @@
-// src/hooks/__tests__/useTasks.test.js
 import { renderHook } from '@testing-library/react'
+import useSWR from 'swr'
 import { useTasks } from '../useTasks'
 
 jest.mock('@/lib/api', () => ({
@@ -17,9 +17,9 @@ jest.mock('swr', () => {
   return { __esModule: true, default: useSWRSpy }
 })
 
-import useSWR from 'swr'
-
 describe('useTasks SWR config', () => {
+  beforeEach(() => useSWR.mockClear())
+
   it('passes errorRetryCount: 5 to SWR', () => {
     renderHook(() => useTasks())
     const [, , options] = useSWR.mock.calls[0]
