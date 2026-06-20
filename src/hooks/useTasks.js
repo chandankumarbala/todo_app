@@ -1,17 +1,19 @@
 import useSWR from 'swr'
 import { getTasks, createTask as apiCreateTask, updateTask as apiUpdateTask, deleteTask as apiDeleteTask, reorderTasks as apiReorderTasks, togglePriority as apiTogglePriority } from '@/lib/api'
 
-const fetcher = () => getTasks()
-
-export function useTasks() {
-  const { data, error, mutate } = useSWR('/api/tasks', fetcher, {
-    refreshInterval: 60000,
-    errorRetryCount: 5,
-    errorRetryInterval: 1000,
-  })
+export function useTasks(tabId) {
+  const { data, error, mutate } = useSWR(
+    tabId ? ['/api/tasks', tabId] : null,
+    () => getTasks(tabId),
+    {
+      refreshInterval: 60000,
+      errorRetryCount: 5,
+      errorRetryInterval: 1000,
+    }
+  )
 
   async function createTask(text, deadline) {
-    await apiCreateTask(text, deadline)
+    await apiCreateTask(text, deadline, tabId)
     await mutate()
   }
 
