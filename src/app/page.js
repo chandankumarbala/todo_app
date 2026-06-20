@@ -1,10 +1,13 @@
 'use client'
+import { useTabs } from '@/hooks/useTabs'
 import { useTasks } from '@/hooks/useTasks'
+import TabBar from '@/components/TabBar'
 import TaskList from '@/components/TaskList'
 import CompletedList from '@/components/CompletedList'
 
 export default function Home() {
-  const { pending, completed, isLoading, error, createTask, updateTask, deleteTask, reorderTasks, completeTask, startOrResetPriority } = useTasks()
+  const { tabs, activeTabId, setActiveTabId, createTab, updateTab, deleteTab } = useTabs()
+  const { pending, completed, isLoading, error, createTask, updateTask, deleteTask, reorderTasks, completeTask, startOrResetPriority } = useTasks(activeTabId)
 
   if (isLoading) {
     return (
@@ -23,6 +26,30 @@ export default function Home() {
     )
   }
 
+  async function handleAddTab() {
+    try {
+      await createTab('New Tab')
+    } catch (e) {
+      console.error('createTab failed:', e)
+    }
+  }
+
+  async function handleDeleteTab(id) {
+    try {
+      await deleteTab(id)
+    } catch (e) {
+      alert(e.message)
+    }
+  }
+
+  async function handleRenameTab(id, name) {
+    try {
+      await updateTab(id, { name })
+    } catch (e) {
+      console.error('updateTab failed:', e)
+    }
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-900">
       {/* Title bar */}
@@ -30,8 +57,15 @@ export default function Home() {
         className="flex items-center justify-between px-3 py-2 bg-gray-800 border-b border-gray-700 shrink-0"
         data-tauri-drag-region
       >
-        <span className="text-xs font-semibold text-gray-300 tracking-widest uppercase" data-tauri-drag-region>Tasks</span>
-        <div className="flex gap-1" style={{ WebkitAppRegion: 'no-drag' }} onMouseDown={(e) => e.stopPropagation()}>
+        <TabBar
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelect={setActiveTabId}
+          onAdd={handleAddTab}
+          onRename={handleRenameTab}
+          onDelete={handleDeleteTab}
+        />
+        <div className="flex gap-1 shrink-0" style={{ WebkitAppRegion: 'no-drag' }} onMouseDown={(e) => e.stopPropagation()}>
           <button
             onClick={async () => {
               if (window.__TAURI_INTERNALS__) {
