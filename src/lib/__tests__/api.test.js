@@ -10,18 +10,18 @@ beforeEach(() => {
   mockJson.mockResolvedValue([])
 })
 
-test('getTasks calls GET /api/tasks', async () => {
+test('getTasks calls GET /api/tasks?tab=tabId', async () => {
   mockJson.mockResolvedValue([{ id: 1, text: 'test', completed: 0, position: 0 }])
-  const result = await getTasks()
-  expect(mockFetch).toHaveBeenCalledWith('/api/tasks')
+  const result = await getTasks(1)
+  expect(mockFetch).toHaveBeenCalledWith('/api/tasks?tab=1')
   expect(result).toHaveLength(1)
 })
 
-test('createTask calls POST /api/tasks', async () => {
-  await createTask('buy milk', '2026-06-10')
+test('createTask calls POST /api/tasks with tab_id', async () => {
+  await createTask('buy milk', '2026-06-10', 1)
   expect(mockFetch).toHaveBeenCalledWith('/api/tasks', expect.objectContaining({
     method: 'POST',
-    body: JSON.stringify({ text: 'buy milk', deadline: '2026-06-10' }),
+    body: JSON.stringify({ text: 'buy milk', deadline: '2026-06-10', tab_id: 1 }),
   }))
 })
 

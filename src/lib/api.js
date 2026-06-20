@@ -44,33 +44,42 @@ async function getDB() {
   return _db
 }
 
-export async function getTasks() {
+export async function getTasks(tabId) {
   if (isTauri()) {
     const db = await getDB()
-    const pending = await db.select('SELECT * FROM tasks WHERE completed = 0 ORDER BY position ASC')
-    const completed = await db.select('SELECT * FROM tasks WHERE completed = 1 ORDER BY completed_at DESC')
+    const pending = await db.select(
+      'SELECT * FROM tasks WHERE completed = 0 AND tab_id = $1 ORDER BY position ASC',
+      [tabId]
+    )
+    const completed = await db.select(
+      'SELECT * FROM tasks WHERE completed = 1 AND tab_id = $1 ORDER BY completed_at DESC',
+      [tabId]
+    )
     return [...pending, ...completed]
   }
-  const res = await fetch('/api/tasks')
+  const res = await fetch(`/api/tasks?tab=${tabId}`)
   if (!res.ok) throw new Error('Failed to fetch tasks')
   return res.json()
 }
 
-export async function createTask(text, deadline) {
+export async function createTask(text, deadline, tabId) {
   if (isTauri()) {
     const db = await getDB()
-    const rows = await db.select('SELECT MAX(position) as m FROM tasks WHERE completed = 0')
+    const rows = await db.select(
+      'SELECT MAX(position) as m FROM tasks WHERE completed = 0 AND tab_id = $1',
+      [tabId]
+    )
     const position = (rows[0].m ?? -1) + 1
     await db.execute(
-      'INSERT INTO tasks (text, deadline, position, created_at) VALUES ($1, $2, $3, $4)',
-      [text.trim(), deadline || null, position, nowSGT()]
+      'INSERT INTO tasks (text, deadline, position, created_at, tab_id) VALUES ($1, $2, $3, $4, $5)',
+      [text.trim(), deadline || null, position, nowSGT(), tabId]
     )
     return
   }
   const res = await fetch('/api/tasks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, deadline }),
+    body: JSON.stringify({ text, deadline, tab_id: tabId }),
   })
   if (!res.ok) throw new Error('Failed to create task')
 }
