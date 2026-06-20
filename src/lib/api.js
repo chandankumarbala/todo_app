@@ -8,11 +8,35 @@ function nowSGT() {
 
 let _db = null
 
+async function runMigrations(db) {
+  await db.execute(
+    `CREATE TABLE IF NOT EXISTS tabs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL DEFAULT 'Tasks',
+      position INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    )`,
+    []
+  )
+  const tabCount = await db.select('SELECT COUNT(*) as c FROM tabs', [])
+  if (tabCount[0].c === 0) {
+    await db.execute(
+      "INSERT INTO tabs (name, position, created_at) VALUES ('Tasks', 0, $1)",
+      [nowSGT()]
+    )
+  }
+  const cols = await db.select('PRAGMA table_info(tasks)', [])
+  if (!cols.some(c => c.name === 'tab_id')) {
+    await db.execute('ALTER TABLE tasks ADD COLUMN tab_id INTEGER NOT NULL DEFAULT 1', [])
+  }
+}
+
 async function getDB() {
   if (_db) return _db
   try {
     const { default: Database } = await import('@tauri-apps/plugin-sql')
     _db = await Database.load('sqlite:tasks.db')
+    await runMigrations(_db)
   } catch (e) {
     _db = null
     throw e
