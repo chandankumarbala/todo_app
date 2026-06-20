@@ -154,3 +154,86 @@ export async function togglePriority(id, priorityOn) {
   })
   if (!res.ok) throw new Error('Failed to toggle priority')
 }
+
+export async function getTabs() {
+  if (isTauri()) {
+    const db = await getDB()
+    return db.select('SELECT * FROM tabs ORDER BY position ASC', [])
+  }
+  const res = await fetch('/api/tabs')
+  if (!res.ok) throw new Error('Failed to fetch tabs')
+  return res.json()
+}
+
+export async function createTab(name) {
+  if (isTauri()) {
+    const db = await getDB()
+    const count = await db.select('SELECT COUNT(*) as c FROM tabs', [])
+    if (count[0].c >= 10) throw new Error('Maximum 10 tabs allowed')
+    const rows = await db.select('SELECT MAX(position) as m FROM tabs', [])
+    const position = (rows[0].m ?? -1) + 1
+    await db.execute(
+      'INSERT INTO tabs (name, position, created_at) VALUES ($1, $2, $3)',
+      [name.trim(), position, nowSGT()]
+    )
+    return
+  }
+  const res = await fetch('/api/tabs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  if (!res.ok) throw new Error('Failed to create tab')
+}
+
+export async function updateTab(id, changes) {
+  if (isTauri()) {
+    const db = await getDB()
+    const rows = await db.select('SELECT * FROM tabs WHERE id = $1', [id])
+    if (!rows.length) throw new Error('Tab not found')
+    const tab = rows[0]
+    const name = changes.name !== undefined ? changes.name.trim() : tab.name
+    await db.execute('UPDATE tabs SET name=$1 WHERE id=$2', [name, id])
+    return
+  }
+  const res = await fetch(`/api/tabs/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(changes),
+  })
+  if (!res.ok) throw new Error('Failed to update tab')
+}
+
+export async function deleteTab(id) {
+  if (isTauri()) {
+    const db = await getDB()
+    const tasks = await db.select('SELECT COUNT(*) as c FROM tasks WHERE tab_id = $1', [id])
+    if (tasks[0].c > 0) throw new Error('Cannot delete tab with tasks')
+    await db.execute('DELETE FROM tabs WHERE id = $1', [id])
+    return
+  }
+  const res = await fetch(`/api/tabs/${id}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error('Failed to delete tab')
+}
+
+export async function reorderTabs(orderedIds) {
+  if (isTauri()) {
+    const db = await getDB()
+    await db.execute('BEGIN', [])
+    try {
+      for (let i = 0; i < orderedIds.length; i++) {
+        await db.execute('UPDATE tabs SET position = $1 WHERE id = $2', [i, orderedIds[i]])
+      }
+      await db.execute('COMMIT', [])
+    } catch (e) {
+      await db.execute('ROLLBACK', [])
+      throw e
+    }
+    return
+  }
+  await fetch('/api/tabs/reorder', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order: orderedIds }),
+  })
+}

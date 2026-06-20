@@ -1,5 +1,5 @@
 // Tests fetch path only (isTauri() returns false in JSDOM since window.__TAURI_INTERNALS__ is undefined)
-import { getTasks, createTask, updateTask, deleteTask, reorderTasks, togglePriority } from '../api'
+import { getTasks, createTask, updateTask, deleteTask, reorderTasks, togglePriority, getTabs, createTab, updateTab, deleteTab, reorderTabs as reorderTabsApi } from '../api'
 
 const mockJson = jest.fn()
 const mockFetch = jest.fn(() => Promise.resolve({ ok: true, json: mockJson, status: 200 }))
@@ -62,4 +62,43 @@ test('togglePriority OFF calls PATCH with priority=0 and priority_set_at=null', 
     method: 'PATCH',
     body: JSON.stringify({ priority: 0, priority_set_at: null }),
   }))
+})
+
+describe('tab API (web path)', () => {
+  test('getTabs calls GET /api/tabs', async () => {
+    mockJson.mockResolvedValue([{ id: 1, name: 'Tasks', position: 0 }])
+    const result = await getTabs()
+    expect(mockFetch).toHaveBeenCalledWith('/api/tabs')
+    expect(result).toHaveLength(1)
+    expect(result[0].name).toBe('Tasks')
+  })
+
+  test('createTab calls POST /api/tabs', async () => {
+    await createTab('Work')
+    expect(mockFetch).toHaveBeenCalledWith('/api/tabs', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ name: 'Work' }),
+    }))
+  })
+
+  test('updateTab calls PATCH /api/tabs/:id', async () => {
+    await updateTab(1, { name: 'Personal' })
+    expect(mockFetch).toHaveBeenCalledWith('/api/tabs/1', expect.objectContaining({
+      method: 'PATCH',
+      body: JSON.stringify({ name: 'Personal' }),
+    }))
+  })
+
+  test('deleteTab calls DELETE /api/tabs/:id', async () => {
+    await deleteTab(2)
+    expect(mockFetch).toHaveBeenCalledWith('/api/tabs/2', { method: 'DELETE' })
+  })
+
+  test('reorderTabsApi calls PATCH /api/tabs/reorder', async () => {
+    await reorderTabsApi([2, 1])
+    expect(mockFetch).toHaveBeenCalledWith('/api/tabs/reorder', expect.objectContaining({
+      method: 'PATCH',
+      body: JSON.stringify({ order: [2, 1] }),
+    }))
+  })
 })
