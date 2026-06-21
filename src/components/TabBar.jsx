@@ -54,7 +54,7 @@ export default function TabBar({ tabs, activeTabId, onSelect, onAdd, onRename, o
               onClick={e => e.stopPropagation()}
             />
           ) : (
-            <span>{tab.name}</span>
+            <span>{tab.name}{tab.pending_count > 0 ? ` [${tab.pending_count}]` : ''}</span>
           )}
           <button
             data-testid={`delete-tab-${tab.id}`}
