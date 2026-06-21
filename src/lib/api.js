@@ -167,7 +167,13 @@ export async function togglePriority(id, priorityOn) {
 export async function getTabs() {
   if (isTauri()) {
     const db = await getDB()
-    return db.select('SELECT * FROM tabs ORDER BY position ASC', [])
+    return db.select(
+      `SELECT t.*,
+        (SELECT COUNT(*) FROM tasks WHERE tab_id = t.id AND completed = 0) AS pending_count
+       FROM tabs t
+       ORDER BY t.position ASC`,
+      []
+    )
   }
   const res = await fetch('/api/tabs')
   if (!res.ok) throw new Error('Failed to fetch tabs')
